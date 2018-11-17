@@ -5,7 +5,7 @@ import io.gatling.http.Predef._
 import scala.concurrent.duration._
 
 class user extends Simulation { 
-  val jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzQwMDYwMjUsInN1YiI6MjV9.BRw4LVstlPjl6nyQV_6Yx7CA9tN9GakX7Ia2hk9HLVQ"
+  val jwt = [SECRET]
   val baseurl = "http://api-citrakara.herokuapp.com/v1"
 
   val usernameField = "username"
