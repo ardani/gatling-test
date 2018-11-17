@@ -5,23 +5,38 @@ import io.gatling.http.Predef._
 import scala.concurrent.duration._
 
 class user extends Simulation { 
-  val jwt = "[secret JWT]"
+  val jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NzQwMDYwMjUsInN1YiI6MjV9.BRw4LVstlPjl6nyQV_6Yx7CA9tN9GakX7Ia2hk9HLVQ"
   val baseurl = "http://api-citrakara.herokuapp.com/v1"
 
   val usernameField = "username"
   val emailField = "email"
   val bioField = "bio"
 
-  val header_1 =  Map(
+  val header =  Map(
       "Content-Type" -> "application/json",
       "Accept-Charset" -> "utf-8",
       "Authorization" -> jwt )
 
   val httpConf = http 
     .baseURL(baseurl) 
-    .headers(header_1)
+    .headers(header)
 
-  val scn1 = scenario("Testing users Endpoints")
+  val scn = scenario("Testing users Endpoints")
+    .exec(http("User Sign up")
+      .post("/user/signup")
+      .body(StringBody("""{ "user":
+                             {
+                              "username":"artistku", 
+                              "email":"artistku@email.com",
+                              "password":"123456", 
+                              "password_confirmation":"123456",
+                              "artist":"1"
+                              }
+                          }""")).asJSON
+      .check(status.is(201))
+      .check(jsonPath("$..password_digest"))
+    )
+        
     .exec(http("get all users")
       .get("/user/all")
       .check(status.is(200))
@@ -46,15 +61,6 @@ class user extends Simulation {
       .check(jsonPath("$..email"))      
       )
 
-  val scn2 = scenario("Testing paintings endpoints")
-    .exec(http("Get paintings")
-      .get("/paintings")
-      .check(status.is(200))
-      .check(jsonPath("$..title"))
-      .check(jsonPath("$..description")) 
-    )
-
-
-  setUp(scn1.inject(atOnceUsers(1)), scn2.inject(atOnceUsers(1)))
-    .protocols(httpConf)
+  setUp(scn.inject(atOnceUsers(1)))
+      .protocols(httpConf)
 }
